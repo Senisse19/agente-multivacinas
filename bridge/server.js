@@ -40,7 +40,10 @@ for (const v of required) {
 }
 
 const app = express();
-app.use(express.json());
+// Captura o raw body para verificação de assinatura do Chatwoot
+app.use(express.json({
+  verify: (req, _res, buf) => { req.rawBody = buf; },
+}));
 
 // ─── Helpers Chatwoot ────────────────────────────────────────────────────────
 
@@ -141,24 +144,19 @@ function resolveAccountId(inboxId) {
 
 // ─── Webhook ─────────────────────────────────────────────────────────────────
 
-app.post('/webhook', express.raw({ type: 'application/json' }), (req, res, next) => {
+app.post('/webhook', async (req, res) => {
   // Verifica assinatura do Chatwoot se o segredo estiver configurado
-  if (CHATWOOT_WEBHOOK_SECRET) {
+  if (CHATWOOT_WEBHOOK_SECRET && req.rawBody) {
     const signature = req.headers['x-chatwoot-signature'];
     const expected = crypto
       .createHmac('sha256', CHATWOOT_WEBHOOK_SECRET)
-      .update(req.body)
+      .update(req.rawBody)
       .digest('hex');
     if (signature !== expected) {
       console.warn('[bridge] Webhook com assinatura inválida — ignorado');
       return res.sendStatus(401);
     }
-    req.body = JSON.parse(req.body);
   }
-  next();
-});
-
-app.post('/webhook', async (req, res) => {
   // Responde 200 imediatamente para o Chatwoot não retentar
   res.sendStatus(200);
 
