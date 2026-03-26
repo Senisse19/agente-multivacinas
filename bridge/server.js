@@ -114,7 +114,7 @@ async function askOpenClaw(messages, accountId) {
       Authorization: `Bearer ${OPENCLAW_GATEWAY_TOKEN}`,
     },
     body: JSON.stringify({
-      model: 'openclaw/default',
+      model: 'default',
       stream: false,
       messages: [
         // Injeta o contexto de loja como primeira mensagem de sistema
