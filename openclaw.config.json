@@ -1,0 +1,43 @@
+// CONFIGURAÇÃO DO GATEWAY OPENCLAW — MultiVacinas
+// ================================================
+// Este arquivo vai para: OPENCLAW_CONFIG_DIR/openclaw.json
+// No container Docker padrão: /home/node/.openclaw/openclaw.json
+//
+// Documentação: https://docs.openclaw.ai/gateway/configuration
+{
+  agents: {
+    defaults: {
+      // Caminho do workspace DENTRO do container Docker
+      // O Coolify monta o volume do projeto aqui via OPENCLAW_WORKSPACE_DIR
+      workspace: "/home/node/.openclaw/workspace",
+
+      model: {
+        primary: "anthropic/claude-opus-4-6",
+        fallbacks: ["anthropic/claude-sonnet-4-6"],
+      },
+
+      // Apenas leitura de arquivos — necessário para ler os PDFs de knowledge/
+      tools: {
+        allow: ["group:fs"],
+        deny: ["exec", "browser", "web_search", "web_fetch", "canvas", "nodes"],
+      },
+    },
+  },
+
+  gateway: {
+    port: 18789,
+
+    // "lan" obrigatório no Docker para a bridge conseguir se conectar
+    bind: "lan",
+
+    auth: {
+      // Gere com: openssl rand -hex 32
+      // Este mesmo valor vai em OPENCLAW_GATEWAY_TOKEN no .env da bridge
+      token: "<<TOKEN_SEGURO — openssl rand -hex 32>>",
+    },
+
+    reload: {
+      mode: "hybrid",
+    },
+  },
+}
