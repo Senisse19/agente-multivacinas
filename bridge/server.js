@@ -9,6 +9,7 @@
  * Variáveis de ambiente necessárias: veja .env.example na raiz do projeto.
  */
 
+const crypto = require('crypto');
 const express = require('express');
 
 const {
@@ -18,6 +19,7 @@ const {
   CHATWOOT_TEAM_ID,
   CHATWOOT_INBOX_LOJA1_ID,
   CHATWOOT_INBOX_LOJA2_ID,
+  CHATWOOT_WEBHOOK_SECRET,
   OPENCLAW_GATEWAY_URL = 'http://localhost:18789',
   OPENCLAW_GATEWAY_TOKEN,
   PORT = 3001,
@@ -138,6 +140,23 @@ function resolveAccountId(inboxId) {
 }
 
 // ─── Webhook ─────────────────────────────────────────────────────────────────
+
+app.post('/webhook', express.raw({ type: 'application/json' }), (req, res, next) => {
+  // Verifica assinatura do Chatwoot se o segredo estiver configurado
+  if (CHATWOOT_WEBHOOK_SECRET) {
+    const signature = req.headers['x-chatwoot-signature'];
+    const expected = crypto
+      .createHmac('sha256', CHATWOOT_WEBHOOK_SECRET)
+      .update(req.body)
+      .digest('hex');
+    if (signature !== expected) {
+      console.warn('[bridge] Webhook com assinatura inválida — ignorado');
+      return res.sendStatus(401);
+    }
+    req.body = JSON.parse(req.body);
+  }
+  next();
+});
 
 app.post('/webhook', async (req, res) => {
   // Responde 200 imediatamente para o Chatwoot não retentar
