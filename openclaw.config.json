@@ -30,11 +30,8 @@
     // "lan" obrigatório no Docker para a bridge conseguir se conectar
     bind: "lan",
 
-    auth: {
-      // Gere com: openssl rand -hex 32
-      // Este mesmo valor vai em OPENCLAW_GATEWAY_TOKEN no .env da bridge
-      token: "<<TOKEN_SEGURO — openssl rand -hex 32>>",
-    },
+    // Token lido da variável de ambiente OPENCLAW_GATEWAY_TOKEN (configurada no Coolify)
+    auth: {},
 
     reload: {
       mode: "hybrid",

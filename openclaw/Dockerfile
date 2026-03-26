@@ -1,9 +1,6 @@
 FROM ghcr.io/openclaw/openclaw:latest
 
-# Copia os arquivos do workspace para dentro do container
 COPY AGENTS.md SOUL.md TOOLS.md /home/node/.openclaw/workspace/
 COPY skills/ /home/node/.openclaw/workspace/skills/
 COPY knowledge/ /home/node/.openclaw/workspace/knowledge/
-
-# Copia o config do gateway
 COPY openclaw.config.json /home/node/.openclaw/openclaw.json
